@@ -1,0 +1,563 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>STINKHAUSEN – Mein Haus</title>
+<meta name="description" content="Stinkhausen – die Minecraft-Stadt aus dem TikTok-LIVE. Such deinen TikTok-Namen und sieh dein Haus, deine Stufe und deinen Platz in der Stadt.">
+<meta name="theme-color" content="#0b0b0d">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self' https: http://127.0.0.1:3250 http://localhost:3250; base-uri 'none'; form-action 'none'">
+<meta property="og:title" content="STINKHAUSEN – Mein Haus">
+<meta property="og:description" content="Die Minecraft-Stadt aus dem TikTok-LIVE – such dein Haus.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b0b0d'/%3E%3Cpath d='M5 15L16 6l11 9z' fill='%23e0663f'/%3E%3Crect x='8' y='15' width='16' height='11' fill='%23c98d55'/%3E%3Crect x='14' y='19' width='4' height='7' fill='%236b4226'/%3E%3Crect x='3' y='26' width='26' height='3' fill='%236ad13f'/%3E%3C/svg%3E">
+<!-- STINKHAUSEN – „Mein Haus“ (25.11.2026), im Stil von gitterkoenig.github.io. Liegt fest auf GitHub Pages; die Zahlen
+     kommen vom Stadt-Rechner (Adresse in adresse.json, nur lesend aus der Stadt-Datenbank). Keine fremden Schriften,
+     keine Tracker, keine Cookies. Auflage 16: keine Punkte, keine Beträge, keine Schwellen, keine Bitten. -->
+<!-- Impressum: wie auf gitterkoenig.github.io gibt es (noch) keins. Wenn der Chef eins will, in „So geht's“ unter
+     „Datenschutz“ einen Block details/summary „Impressum“ mit „Angaben nach § 5 DDG“, Name, ladungsfähiger Anschrift und
+     E-Mail einfügen. Stehen dort noch Platzhalter in eckigen Klammern, lädt stinkhausen-seite.js die Seite nicht hoch. -->
+<style>
+  :root {
+    --bg: #0b0b0d; --panel: #15151a; --panel2: #1c1c23; --line: rgba(255,255,255,.08); --line2: rgba(255,255,255,.14);
+    --text: #f3f3f5; --muted: #9ea3ad; --dim: #6c717b;
+    --acc: #6ad13f; --acc2: #a8ee7e; --ink: #0b1a04; --red: #ff3b3b; --gold: #ffd84a; --sky1: #1c2c4a; --sky2: #121a2b;
+    --g0: #c98d55; --g1: #e0663f; --g2: #3fe0c5; --g3: #b46bff; --g4: #ffd84a;
+    --head: Impact, "Haettenschweiler", "Arial Narrow Bold", "Franklin Gothic Bold", "Bahnschrift", sans-serif;
+    --body: "Bahnschrift", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+    --r: 16px; --tabs: 68px;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { background: var(--bg); -webkit-text-size-adjust: 100%; }
+  body { margin: 0; min-height: 100vh; color: var(--text); font: 15px/1.45 var(--body); overflow-x: hidden; background:
+      radial-gradient(1200px 600px at 50% -200px, rgba(106,209,63,.15), transparent 70%),
+      repeating-linear-gradient(90deg, rgba(255,255,255,.018) 0 2px, transparent 2px 46px), var(--bg);
+    padding-bottom: calc(var(--tabs) + env(safe-area-inset-bottom) + 18px); }
+  a { color: var(--acc2); }
+  img { max-width: 100%; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 0 14px; }
+  /* Gras-Streifen statt Absperrband */
+  .tape { height: 12px; background: repeating-linear-gradient(90deg, rgba(0,0,0,.14) 0 6px, transparent 6px 12px) 0 0 / 100% 5px no-repeat, linear-gradient(#5cb531 0 5px, #8a5a35 5px); box-shadow: inset 0 -2px 0 #6b4226; }
+
+  /* ---------- Kopf ---------- */
+  header { position: sticky; top: 0; z-index: 20; background: rgba(11,11,13,.88); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+  .bar { display: flex; align-items: center; gap: 10px; height: 58px; }
+  .logo { display: flex; align-items: center; gap: 9px; text-decoration: none; color: var(--text); min-width: 0; }
+  .logo svg { width: 30px; height: 30px; flex: none; }
+  .logo b { font: 400 26px/1 var(--head); letter-spacing: 1.5px; white-space: nowrap; }
+  .logo b i { font-style: normal; color: var(--acc); }
+  .live { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px; border-radius: 999px; font: 700 12px var(--body); letter-spacing: 1.5px; text-transform: uppercase; text-decoration: none; color: #fff; background: #26262e; border: 1px solid var(--line2); white-space: nowrap; }
+  .live::before { content: ''; width: 9px; height: 9px; border-radius: 50%; background: var(--dim); }
+  .live.on { background: var(--red); border-color: transparent; box-shadow: 0 0 18px rgba(255,59,59,.55); }
+  .live.on::before { background: #fff; animation: blink 1.1s infinite; }
+  @keyframes blink { 50% { opacity: .25 } }
+  .waTop { width: 36px; height: 36px; flex: none; display: inline-grid; place-items: center; border-radius: 50%; background: #25d366; box-shadow: 0 0 0 3px rgba(37,211,102,.18); }
+  .waTop svg { width: 20px; height: 20px; }
+  @media (max-width: 360px) { .logo b { font-size: 22px; } .live { padding: 6px 9px; letter-spacing: .8px; } }
+
+  /* ---------- Bereiche ---------- */
+  .view { display: none; padding: 16px 0 8px; animation: fade .35s ease both; }
+  .view.on { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
+  h2 { font: 400 26px/1.05 var(--head); letter-spacing: 1.2px; margin: 26px 0 12px; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+  h2 small { font: 600 12px var(--body); letter-spacing: 1px; color: var(--muted); text-transform: none; margin-left: auto; }
+  h2::before { content: ''; flex: none; width: 6px; height: 22px; background: var(--acc); border-radius: 2px; }
+  .card { background: linear-gradient(180deg, var(--panel2), var(--panel)); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+  .muted { color: var(--muted); }
+  .num { font-variant-numeric: tabular-nums; }
+  .note { margin-top: 12px; padding: 14px; border-radius: 14px; background: var(--panel); border: 1px dashed var(--line2); color: #d6d6dc; }
+  .offline { display: none; margin: 12px 0 0; padding: 10px 12px; border-radius: 12px; background: #1d1a10; border: 1px solid rgba(255,216,74,.35); color: #f1e6b8; font: 700 13px var(--body); }
+  .offline.on { display: block; }
+
+  /* ---------- Suche ---------- */
+  .hero { position: relative; overflow: hidden; padding: 22px 18px 20px; border-radius: 20px; border: 1px solid rgba(106,209,63,.35);
+    background: linear-gradient(160deg, rgba(106,209,63,.20), rgba(106,209,63,.03) 55%), var(--panel); }
+  /* Stadt-Silhouette rechts unten */
+  .hero::after { content: ''; position: absolute; right: -6px; bottom: 0; width: 210px; height: 120px; opacity: .22; pointer-events: none;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 210 120'%3E%3Cg fill='%23a8ee7e'%3E%3Crect x='0' y='70' width='26' height='50'/%3E%3Cpath d='M0 70l13-12 13 12z'/%3E%3Crect x='32' y='44' width='30' height='76'/%3E%3Crect x='68' y='60' width='22' height='60'/%3E%3Cpath d='M66 60l13-14 13 14z'/%3E%3Crect x='96' y='20' width='26' height='100'/%3E%3Crect x='104' y='8' width='10' height='12'/%3E%3Crect x='128' y='52' width='34' height='68'/%3E%3Cpath d='M126 52l19-16 19 16z'/%3E%3Crect x='168' y='34' width='20' height='86'/%3E%3Crect x='192' y='64' width='18' height='56'/%3E%3C/g%3E%3C/svg%3E") right bottom / contain no-repeat; }
+  .hero h1 { position: relative; z-index: 1; margin: 0; font: 400 38px/0.98 var(--head); letter-spacing: 1px; text-transform: uppercase; max-width: 15ch; }
+  .hero h1 em { font-style: normal; color: var(--acc); }
+  .hero p { position: relative; z-index: 1; margin: 10px 0 16px; color: #d8d8de; max-width: 34ch; }
+  .search { position: relative; z-index: 1; display: flex; gap: 8px; }
+  .search input { flex: 1; min-width: 0; height: 50px; padding: 0 14px 0 40px; border-radius: 13px; border: 1px solid var(--line2); background: #0e0e12 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ea3ad' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-4-4'/%3E%3C/svg%3E") 13px 50%/19px no-repeat; color: var(--text); font: 600 16px var(--body); outline: none; }
+  .search input:focus { border-color: var(--acc); box-shadow: 0 0 0 3px rgba(106,209,63,.25); }
+  .btn { height: 50px; padding: 0 18px; border: 0; border-radius: 13px; background: var(--acc); color: var(--ink); font: 800 15px var(--body); letter-spacing: .5px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; white-space: nowrap; }
+  .btn:active { transform: translateY(1px); }
+  .btn.ghost { background: #23232b; color: var(--text); border: 1px solid var(--line2); }
+  .btn.small { height: 40px; padding: 0 14px; font-size: 14px; border-radius: 11px; }
+  :focus-visible { outline: 3px solid var(--acc2); outline-offset: 2px; }
+
+  /* ---------- WhatsApp (gemeinsamer Kanal für beide Server) ---------- */
+  .wa { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; margin: 16px 0 4px; padding: 14px; border-radius: 16px; background: linear-gradient(135deg, #0c3b25, #12693d); border: 1px solid #25d366; color: #fff; text-decoration: none; }
+  .wa b { display: block; font: 800 16px var(--body); }
+  .wa p { margin: 4px 0 0; font-size: 13px; line-height: 1.35; color: #d6f5e3; }
+  .wa small { display: block; margin-top: 6px; font-size: 11px; color: #9fd8b8; }
+  .wa .go { padding: 10px 14px; border-radius: 999px; background: #25d366; color: #052e16; font: 800 14px var(--body); white-space: nowrap; }
+  .waCta { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 16px; padding: 10px 12px; border-radius: 12px; background: #0c3b25; border: 1px solid #25d366; color: #d6f5e3; font-size: 13px; text-decoration: none; }
+  .waCta b { color: #25d366; white-space: nowrap; }
+
+  /* ---------- Hausbild ---------- */
+  .pic { position: relative; display: block; overflow: hidden; border-radius: 12px; border: 1px solid var(--line2); padding: 6px;
+    background: radial-gradient(ellipse at 50% 88%, rgba(168,238,126,.16), transparent 62%), linear-gradient(180deg, var(--sky1), var(--sky2)); }
+  .pic img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .pic.noimg { display: grid; place-items: center; }
+  .pic.noimg img { display: none; }
+  .pic.noimg::after { content: "🏠"; font-size: 30px; }
+
+  /* ---------- Zahlen ---------- */
+  .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 14px; }
+  @media (min-width: 560px) { .stats { grid-template-columns: repeat(4, 1fr); } }
+  .stat { padding: 13px 14px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); }
+  .stat b { display: block; font: 400 28px/1 var(--head); letter-spacing: .5px; }
+  .stat span { display: block; margin-top: 5px; color: var(--muted); font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+
+  /* ---------- Größtes Haus ---------- */
+  .king { position: relative; display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: 18px; overflow: hidden; border: 1px solid rgba(255,216,74,.45); cursor: pointer;
+    background: radial-gradient(400px 160px at 15% 0%, rgba(255,216,74,.24), transparent 70%), linear-gradient(180deg, #221d0e, #14130e); }
+  .king .pic { flex: none; width: 92px; height: 92px; border-color: rgba(255,216,74,.5); }
+  .king .who { min-width: 0; }
+  .king .tag { font: 800 11px var(--body); letter-spacing: 2px; color: var(--gold); text-transform: uppercase; }
+  .king .nm { font: 400 26px/1.05 var(--head); letter-spacing: .5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .king .sub { color: #e8dcb0; font-size: 13px; }
+
+  /* ---------- Gerade passiert ---------- */
+  .feed { display: flex; flex-direction: column; gap: 8px; }
+  .ev { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-radius: 13px; background: var(--panel); border: 1px solid var(--line); }
+  .ev .ic { flex: none; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; font-size: 17px; background: #24242c; }
+  .ev .tx { flex: 1; min-width: 0; font-size: 14px; overflow: hidden; text-overflow: ellipsis; }
+  .ev .tx b { font-weight: 800; }
+  .ev time { flex: none; color: var(--dim); font-size: 12px; }
+
+  /* ---------- Hausakte ---------- */
+  .akte { padding: 0; overflow: hidden; }
+  .akte .top { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 16px; background: #0f0f13; border-bottom: 1px dashed var(--line2); font: 800 11px var(--body); letter-spacing: 2.5px; color: var(--muted); text-transform: uppercase; }
+  .akte .top .stamp { color: var(--acc); border: 2px solid var(--acc); border-radius: 6px; padding: 2px 8px; transform: rotate(-4deg); letter-spacing: 2px; white-space: nowrap; }
+  .akte .big { margin: 16px 16px 0; height: 230px; }
+  .who2 { padding: 14px 16px 0; min-width: 0; }
+  .who2 .nm { font: 400 32px/1 var(--head); letter-spacing: .4px; word-break: break-word; }
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .bd { display: inline-flex; align-items: center; gap: 5px; padding: 5px 9px; border-radius: 8px; font: 800 12px var(--body); letter-spacing: .6px; background: #24242c; border: 1px solid var(--line2); }
+  .bd.g0 { background: var(--g0); color: #1a0f05; border: 0; } .bd.g1 { background: var(--g1); color: #1d0700; border: 0; } .bd.g2 { background: var(--g2); color: #022620; border: 0; } .bd.g3 { background: var(--g3); color: #18052e; border: 0; } .bd.g4 { background: var(--g4); color: #2b2200; border: 0; }
+  .lvl { display: flex; align-items: baseline; gap: 10px; margin: 12px 16px 0; flex-wrap: wrap; }
+  .lvl .n { font: 400 46px/0.9 var(--head); color: var(--acc); }
+  .lvl .t { font: 400 24px/1 var(--head); letter-spacing: .5px; }
+  .lvl .c { width: 100%; color: var(--muted); font-size: 13px; }
+  .facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; margin-top: 16px; background: var(--line); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .facts div { background: var(--panel); padding: 12px 14px; }
+  .facts b { display: block; font: 400 22px/1 var(--head); letter-spacing: .4px; }
+  .facts span { color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+  .next { display: flex; align-items: center; gap: 12px; margin: 14px 16px 0; padding: 10px 12px; border-radius: 12px; background: rgba(106,209,63,.08); border: 1px solid rgba(106,209,63,.3); }
+  .next .pic { flex: none; width: 62px; height: 56px; padding: 3px; }
+  .next small { display: block; font: 800 11px var(--body); letter-spacing: 1.5px; color: var(--acc2); text-transform: uppercase; }
+  .next b { font: 400 20px/1.1 var(--head); letter-spacing: .4px; }
+  .actions { display: flex; gap: 8px; padding: 14px 16px 16px; flex-wrap: wrap; }
+  .actions .btn { flex: 1 1 200px; }
+  .sugg { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+
+  /* ---------- Rangliste ---------- */
+  .podium { display: grid; grid-template-columns: 1fr 1.15fr 1fr; align-items: end; gap: 8px; margin-top: 6px; }
+  .pod { text-align: center; padding: 10px 6px 10px; border-radius: 14px 14px 8px 8px; background: var(--panel); border: 1px solid var(--line); cursor: pointer; min-width: 0; color: var(--text); font: inherit; }
+  .pod .pic { height: 74px; margin: 0 auto 8px; }
+  .pod.p1 { padding-top: 14px; border-color: rgba(255,216,74,.5); background: linear-gradient(180deg, #2a2311, var(--panel)); }
+  .pod.p1 .pic { height: 92px; border-color: var(--gold); }
+  .pod .pl { font: 400 30px/1 var(--head); }
+  .pod.p1 .pl { color: var(--gold); } .pod.p2 .pl { color: #d9dde3; } .pod.p3 .pl { color: #e3a46b; }
+  .pod .nm { font-weight: 800; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pod .pt { color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .list { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+  .row1 { display: grid; grid-template-columns: 34px 46px 1fr auto; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 12px; background: var(--panel); border: 1px solid var(--line); cursor: pointer; color: var(--text); font: inherit; text-align: left; width: 100%; }
+  .row1.me { border-color: var(--acc); background: linear-gradient(90deg, rgba(106,209,63,.16), var(--panel)); }
+  .row1 .ps { font: 400 21px var(--head); color: var(--muted); text-align: center; }
+  .row1 .pic { width: 46px; height: 40px; padding: 2px; border-radius: 9px; }
+  .row1 .nm { min-width: 0; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row1 .nm small { display: block; font-weight: 600; color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; }
+  .row1 .pt { text-align: right; font: 400 18px var(--head); letter-spacing: .3px; }
+  .row1 .pt small { display: block; font: 700 10px var(--body); color: var(--muted); letter-spacing: 1px; }
+
+  /* ---------- Stufen ---------- */
+  .block { margin-top: 18px; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: var(--panel); }
+  .block .bh { display: flex; align-items: center; gap: 10px; padding: 12px 14px; font: 400 21px var(--head); letter-spacing: .8px; text-transform: uppercase; }
+  .block .bh .tg { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; font-size: 18px; }
+  .block .bh small { margin-left: auto; font: 700 12px var(--body); color: var(--muted); letter-spacing: .5px; text-transform: none; }
+  .lv { display: grid; grid-template-columns: 112px 1fr auto; gap: 12px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--line); }
+  .lv .pic { width: 112px; height: 96px; }
+  .lv .nm { font: 400 20px/1.05 var(--head); letter-spacing: .4px; }
+  .lv .nm small { display: block; font: 600 13px var(--body); color: var(--muted); letter-spacing: 0; margin-top: 3px; }
+  .lv .need { text-align: right; font: 400 24px var(--head); white-space: nowrap; }
+  .lv .need small { display: block; font: 700 10px var(--body); color: var(--muted); letter-spacing: 1px; }
+  .lv.mine { background: rgba(106,209,63,.10); box-shadow: inset 4px 0 0 var(--acc); }
+  .here { display: inline-block; margin-top: 4px; padding: 2px 7px; border-radius: 6px; background: var(--acc); color: var(--ink); font: 800 10px var(--body); letter-spacing: 1px; }
+  @media (max-width: 400px) { .lv { grid-template-columns: 84px 1fr auto; gap: 10px; } .lv .pic { width: 84px; height: 76px; } }
+
+  /* ---------- So geht's ---------- */
+  .steps { counter-reset: s; display: flex; flex-direction: column; gap: 10px; }
+  .step { position: relative; display: grid; grid-template-columns: 46px 1fr; gap: 12px; padding: 14px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); }
+  .step::before { counter-increment: s; content: counter(s); width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; background: var(--acc); color: var(--ink); font: 400 26px var(--head); }
+  .step b { display: block; font: 400 21px/1.1 var(--head); letter-spacing: .5px; margin-bottom: 3px; }
+  .step p { margin: 0; color: #d4d4da; }
+  .step ul { margin: 4px 0 0; padding-left: 18px; color: #d4d4da; }
+  details { background: var(--panel); border: 1px solid var(--line); border-radius: 13px; padding: 12px 14px; margin-top: 8px; }
+  summary { cursor: pointer; font-weight: 800; }
+  details p { margin: 8px 0 0; color: #d4d4da; }
+  footer { margin: 30px 0 10px; text-align: center; color: var(--dim); font-size: 12px; }
+
+  /* ---------- Leiste unten ---------- */
+  nav.tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; padding-bottom: env(safe-area-inset-bottom); background: rgba(12,12,15,.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--line2); }
+  nav.tabs .in { max-width: 720px; margin: 0 auto; display: grid; grid-template-columns: repeat(5, 1fr); height: var(--tabs); }
+  nav.tabs a { position: relative; min-width: 0; padding: 0 1px; color: var(--dim); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font: 800 10px/1.1 var(--body); letter-spacing: .3px; text-transform: uppercase; text-align: center; text-decoration: none; }
+  @media (max-width: 359px) { nav.tabs a { font-size: 9px; letter-spacing: 0; } }
+  nav.tabs a svg { width: 24px; height: 24px; }
+  nav.tabs a.on { color: var(--acc); }
+  .skel { height: 120px; border-radius: 16px; background: linear-gradient(90deg, #17171c, #202028, #17171c); background-size: 200% 100%; animation: sk 1.2s infinite; }
+  @keyframes sk { to { background-position: -200% 0 } }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="tape" aria-hidden="true"></div>
+<header>
+  <div class="wrap bar">
+    <a class="logo" href="#uebersicht" aria-label="Stinkhausen – Übersicht">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 15L16 5l12 10z" fill="#e0663f"/><rect x="7" y="15" width="18" height="11" fill="#c98d55"/><rect x="10" y="18" width="4" height="4" fill="#ffd84a"/><rect x="18" y="19" width="4" height="7" fill="#6b4226"/><rect x="2" y="26" width="28" height="3.5" rx="1" fill="#6ad13f"/></svg>
+      <b>STINK<i>HAUSEN</i></b>
+    </a>
+    <a id="live" class="live" href="https://www.tiktok.com/@stinkhausen" target="_blank" rel="noopener noreferrer">Offline</a>
+    <a class="waTop" href="https://whatsapp.com/channel/0029VbEgmqf4o7qE9rlr9U0A" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp-Kanal von Stinkhausen und Gitterkönig" title="WhatsApp-Kanal für Stinkhausen und Gitterkönig"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 2.2A9.8 9.8 0 0 0 3.6 17l-1.3 4.7 4.8-1.3A9.8 9.8 0 1 0 12 2.2zm0 17.8a8 8 0 0 1-4.1-1.1l-.3-.2-2.8.8.8-2.7-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.7-.8-.2-.1-.4-.1-.5.1l-.8.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.5-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2c0 1.3.9 2.5 1.1 2.7.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.8 3.1.6.5-.1 1.4-.6 1.6-1.1.2-.6.2-1 .1-1.1l-.4-.2z"/></svg></a>
+  </div>
+</header>
+<div class="wrap"><div class="offline" id="offline" role="status">Die Stadt schläft gerade – die Zahlen kommen wieder, sobald der Stadt-Rechner läuft. Die Stufen kannst du trotzdem ansehen.</div></div>
+
+<main class="wrap">
+  <!-- ===================================================== Übersicht -->
+  <section id="v-uebersicht" class="view on">
+    <div class="hero">
+      <h1>Dein Haus in <em>Stinkhausen</em></h1>
+      <p>Such deinen TikTok-Namen und sieh dein Haus, deine Stufe und deinen Platz in der Stadt – fast in Echtzeit.</p>
+      <form class="search" id="f-start" autocomplete="off">
+        <input name="q" id="q-start" maxlength="40" placeholder="Dein TikTok-Name" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search" aria-label="TikTok-Name">
+        <button class="btn" type="submit">Haus zeigen</button>
+      </form>
+    </div>
+
+    <a class="wa" href="https://whatsapp.com/channel/0029VbEgmqf4o7qE9rlr9U0A" target="_blank" rel="noopener noreferrer">
+      <div><b>📲 Ein Kanal für beide Server</b><p>Stinkhausen und Gitterkönig: Erfahr als Erster, wann die Server live sind und was als Nächstes gebaut wird.</p><small>WhatsApp-Kanal „GITTERKÖNIG - TIKTOK“ · kostenlos · keiner sieht deine Nummer · WhatsApp ab 13</small></div>
+      <span class="go">Zum Kanal</span>
+    </a>
+
+    <h2>Größtes Haus der Stadt</h2>
+    <div id="kingBox"><div class="skel" style="height:120px"></div></div>
+
+    <div class="stats">
+      <div class="stat"><b class="num" id="sHaeuser">–</b><span>Häuser</span></div>
+      <div class="stat"><b class="num" id="sHeute">–</b><span>Neu heute</span></div>
+      <div class="stat"><b class="num" id="sAusbau">–</b><span>Ausbauten heute</span></div>
+      <div class="stat"><b class="num" id="sHoechste">–</b><span>Höchste Stufe</span></div>
+    </div>
+
+    <h2>Die größten Häuser <small><a href="#rang">Ganze Liste</a></small></h2>
+    <div class="podium" id="podiumHome"></div>
+
+    <h2>Gerade passiert <small>live aus der Stadt</small></h2>
+    <div class="feed" id="feed"><div class="skel" style="height:56px"></div></div>
+  </section>
+
+  <!-- ===================================================== Mein Haus -->
+  <section id="v-haus" class="view">
+    <form class="search" id="f-haus" autocomplete="off" style="margin-top:4px">
+      <input name="q" id="q-haus" maxlength="40" placeholder="Dein TikTok-Name" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search" aria-label="TikTok-Name">
+      <button class="btn" type="submit">Suchen</button>
+    </form>
+    <div id="hausBox" style="margin-top:14px" aria-live="polite"></div>
+    <a class="waCta" href="https://whatsapp.com/channel/0029VbEgmqf4o7qE9rlr9U0A" target="_blank" rel="noopener noreferrer"><span>📲 Neues aus Stinkhausen und Gitterkönig zuerst wissen?</span><b>WhatsApp-Kanal →</b></a>
+  </section>
+
+  <!-- ===================================================== Rangliste -->
+  <section id="v-rang" class="view">
+    <h2>Die größten Häuser <small id="rangCount"></small></h2>
+    <div class="podium" id="podium"></div>
+    <div id="meBox"></div>
+    <div class="list" id="rangList"><div class="skel" style="height:56px"></div></div>
+    <a class="waCta" href="https://whatsapp.com/channel/0029VbEgmqf4o7qE9rlr9U0A" target="_blank" rel="noopener noreferrer"><span>📲 Ein Kanal für beide Server – Stinkhausen und Gitterkönig</span><b>WhatsApp-Kanal →</b></a>
+  </section>
+
+  <!-- ===================================================== Stufen -->
+  <section id="v-stufen" class="view">
+    <h2>Alle 25 Häuser</h2>
+    <p class="muted" style="margin:-4px 0 0">Jedes Haus in Stinkhausen wächst Stufe für Stufe – von der Starter-Hütte bis zur Goldenen Stadtkrone. So sieht jede Stufe im Spiel aus.</p>
+    <div id="stufenBox"></div>
+    <a class="waCta" href="https://whatsapp.com/channel/0029VbEgmqf4o7qE9rlr9U0A" target="_blank" rel="noopener noreferrer"><span>📲 Neue Häuser und Bauten zuerst sehen?</span><b>WhatsApp-Kanal →</b></a>
+  </section>
+
+  <!-- ===================================================== So geht's -->
+  <section id="v-regeln" class="view">
+    <h2>So geht's</h2>
+    <div class="steps">
+      <div class="step"><div><b>Komm in den LIVE</b><p>Stinkhausen läuft im TikTok-LIVE von <a href="https://www.tiktok.com/@stinkhausen" target="_blank" rel="noopener noreferrer">@stinkhausen</a>. Bürgermeister Momo führt dich durch die Straßen der Minecraft-Stadt.</p></div></div>
+      <div class="step"><div><b>Mitspielen = eigenes Haus</b><p>Mitspielen kann jeder, der im LIVE dabei ist. Wer mitspielt, bekommt ein eigenes Haus mit seinem Namen.</p></div></div>
+      <div class="step"><div><b>Stufe für Stufe</b><p>Häuser wachsen live im Spiel: von der Starter-Hütte über Villen und Türme bis zur Goldenen Stadtkrone. Alle 25 Häuser siehst du unter „Stufen“.</p></div></div>
+      <div class="step"><div><b>Die Rangliste</b><p>Hier stehen die größten Häuser der Stadt – fast in Echtzeit, direkt aus dem Spiel.</p></div></div>
+      <div class="step"><div><b>Sicher in der Stadt</b><ul><li>Sei nett im Chat – in Stinkhausen sind alle Nachbarn.</li><li>Verrate nie deinen echten Namen, deine Adresse, deine Schule oder ein Passwort.</li><li>Kommt dir etwas komisch vor? Sprich mit deinen Eltern oder einem Erwachsenen, dem du vertraust.</li></ul></div></div>
+      <div class="step"><div><b>📲 Ein WhatsApp-Kanal für beide Server</b><p>Stinkhausen und Gitterkönig teilen sich einen Kanal: „GITTERKÖNIG - TIKTOK“. Dort steht zuerst, wann die Server live sind und was neu gebaut wird. <a href="https://whatsapp.com/channel/0029VbEgmqf4o7qE9rlr9U0A" target="_blank" rel="noopener noreferrer">Zum Kanal</a> (kostenlos, WhatsApp ab 13).</p></div></div>
+    </div>
+    <h2>Fragen</h2>
+    <details><summary>Ich finde meinen Namen nicht.</summary><p>Gib deinen TikTok-Namen ohne @ ein, so wie er in deinem Profil steht. Neue Häuser erscheinen hier kurz nach dem Einzug.</p></details>
+    <details><summary>Wie schnell wird die Seite aktualisiert?</summary><p>Fast in Echtzeit: Die Zahlen kommen direkt aus dem Spiel und sind höchstens ein paar Sekunden alt.</p></details>
+    <details><summary>Was hat Stinkhausen mit Gitterkönig zu tun?</summary><p>Beides sind Spiele im TikTok-LIVE mit Momo. In Gitterkönig wohnst du in einer Zelle, in Stinkhausen in einem Haus. Neuigkeiten zu beiden gibt es im gemeinsamen WhatsApp-Kanal.</p></details>
+    <details><summary>Wer ist Momo?</summary><p>Momo ist der Bürgermeister von Stinkhausen – eine KI-Figur mit eigener Stimme, die im LIVE alles kommentiert und den Chat liest.</p></details>
+    <details><summary>Datenschutz</summary><p>Diese Seite setzt keine Cookies und zählt keine Besucher. Tippst du auf „merken“, merkt sich nur dein eigenes Gerät, welches Haus deins ist (eine kurze Nummer im Browser) – mit „Vergessen“ ist sie wieder weg. Die Seite liegt bei GitHub Pages, die Zahlen kommen über Cloudflare vom Stadt-Rechner; beide verarbeiten dabei technisch deine IP-Adresse. Gezeigt werden nur Anzeigenamen, Stufe und Platz – unpassende Namen werden ausgeblendet.</p></details>
+  </section>
+  <footer>STINKHAUSEN · ein Spiel im TikTok-LIVE von <a href="https://www.tiktok.com/@stinkhausen" target="_blank" rel="noopener noreferrer">@stinkhausen</a> · Momo spricht mit KI-Stimme<br>Kein offizielles Minecraft-Produkt. Nicht von Mojang oder Microsoft genehmigt oder mit ihnen verbunden.<br><span id="updated"></span></footer>
+</main>
+
+<nav class="tabs" aria-label="Bereiche"><div class="in">
+  <a href="#uebersicht" data-v="uebersicht" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V10l5-4 5 4v11M15 21V13h4v8M8 13h4M8 17h4"/></svg>Übersicht</a>
+  <a href="#haus" data-v="haus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Mein Haus</a>
+  <a href="#rang" data-v="rang"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>Rangliste</a>
+  <a href="#stufen" data-v="stufen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4v-5h4v-5h4V5h4"/></svg>Stufen</a>
+  <a href="#regeln" data-v="regeln"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/></svg>So geht's</a>
+</div></nav>
+
+<script>
+'use strict'
+// Die 25 Häuser (Namen + Aussehen). GLEICHE LISTE wie stufen.js – der Test vergleicht beide.
+// Bewusst ohne Schwellen und ohne Beträge (Auflage 16).
+const STUFEN = [
+  ['Starter-Hütte', 'kleine Hütte mit Strohdach'],
+  ['Holzhütte', 'kleine Holzhütte mit Fenster'],
+  ['Blockhütte', 'Blockhütte mit Zaun und Holzstapel'],
+  ['Steinhaus', 'kleines Steinhaus mit Kamin'],
+  ['Backsteinhaus', 'Backsteinhaus mit Garten und Gartenzwerg'],
+  ['Fachwerkhaus', 'zweistöckiges Fachwerkhaus mit Blumenkästen'],
+  ['Familienhaus', 'großes Familienhaus mit Garage'],
+  ['Stadtvilla', 'Stadtvilla mit Balkon und Sportwagen'],
+  ['Landhaus', 'Landhaus mit Springbrunnen'],
+  ['Architektenhaus', 'modernes Architektenhaus mit Glasfront'],
+  ['Herrenhaus', 'edles Herrenhaus mit Freitreppe'],
+  ['Designer-Villa', 'Designer-Villa mit beheiztem Pool'],
+  ['Marmor-Villa', 'weiße Marmor-Villa mit Palmen'],
+  ['Glas-Penthouse', 'Glas-Penthouse mit Dachterrasse'],
+  ['Luxus-Anwesen', 'Luxus-Anwesen mit Hubschrauber-Landeplatz'],
+  ['Neon-Tower', 'Neon-Tower mit Leuchtfassade'],
+  ['Märchenschloss', 'Schloss mit Wachtürmen und Fahnen'],
+  ['Kristall-Wolkenkratzer', 'gläserner Wolkenkratzer, der in der Sonne glitzert'],
+  ['Imperator-Palast', 'goldener Palast mit Säulen'],
+  ['Himmels-Tempel', 'schwebender Tempel mit goldener Aura'],
+  ['Vulkan-Festung', 'Festung mit leuchtenden Lavaströmen'],
+  ['Kristall-Palast', 'Palast aus Amethyst und Eis'],
+  ['Sternen-Turm', 'Turm mit schwebenden Lichtringen'],
+  ['Drachen-Thron', 'Obsidian-Burg mit einem Drachen auf dem Dach'],
+  ['Goldene Stadtkrone', 'goldene Krone über der ganzen Stadt, mit Feuerwerk-Leuchten']
+]
+const GRUPPEN = [[1, 'Kleine Häuser', '🛖'], [6, 'Familienhäuser', '🏡'], [11, 'Villen', '🏛️'], [16, 'Türme und Schlösser', '🏰'], [21, 'Legendäre Bauten', '👑']]
+const TIKTOK = 'https://www.tiktok.com/@stinkhausen'
+const POLL_MS = 5000
+
+// ------------------------------------------------------------------ kleine Helfer (Namen immer escaped)
+const $ = id => document.getElementById(id)
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+const fmt = n => Number(n || 0).toLocaleString('de-DE')
+const grp = n => 'g' + Math.min(4, Math.max(0, Math.floor((Number(n) - 1) / 5)))
+const stufeName = n => (STUFEN[n - 1] || STUFEN[STUFEN.length - 1])[0]
+const store = {
+  get (k) { try { return localStorage.getItem(k) || '' } catch (_) { return '' } },
+  set (k, v) { try { if (v) localStorage.setItem(k, v); else localStorage.removeItem(k) } catch (_) {} }
+}
+const pic = (n, cls, alt) => `<span class="pic ${cls || ''}"><img src="haeuser/stufe-${Number(n) | 0}.png" alt="${esc(alt == null ? stufeName(n) : alt)}" loading="lazy" decoding="async"></span>`
+const ago = m => m == null ? '' : m < 1 ? 'gerade eben' : m < 60 ? 'vor ' + m + ' Min.' : m < 1440 ? 'vor ' + Math.round(m / 60) + ' Std.' : 'vor ' + Math.round(m / 1440) + ' T.'
+// nur neu zeichnen, wenn sich wirklich etwas geändert hat (sonst flackern die Bilder alle paar Sekunden)
+const put = (el, html) => { if (el && el._h !== html) { el._h = html; el.innerHTML = html; el.querySelectorAll('.pic img').forEach(i => i.addEventListener('error', () => i.parentNode.classList.add('noimg'), { once: true })) } }
+
+// ------------------------------------------------------------------ Datenweg
+// Die Seite liegt fest (GitHub Pages); die Zahlen kommen vom Stadt-Rechner, dessen Adresse in adresse.json steht.
+// Wird die Seite direkt vom Stadt-Rechner geladen, steht dort "" (= dieselbe Adresse).
+let API = null; let apiAt = 0
+async function base (force) {
+  if (API !== null && !force) return API
+  if (force && API !== null && Date.now() - apiAt < 30000) return API
+  apiAt = Date.now()
+  let a = API || ''
+  try {
+    const r = await fetch('adresse.json?t=' + Date.now(), { cache: 'no-store' })
+    if (r.ok) { const j = await r.json(); const v = typeof j.api === 'string' ? j.api.replace(/\/+$/, '') : ''; a = v === '' || /^https?:\/\/[a-z0-9.-]+(:\d{2,5})?$/i.test(v) ? v : '' }
+  } catch (_) {}
+  API = a
+  return a
+}
+async function get (p) {
+  for (let i = 0; i < 2; i++) {
+    const b = await base(i > 0)
+    try {
+      const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 9000)
+      const r = await fetch(b + p, { cache: 'no-store', signal: ctl.signal })
+      clearTimeout(t)
+      if (r.ok) { const j = await r.json(); online(true, j); return j }
+      if (r.status === 429) { await new Promise(res => setTimeout(res, 1500)); continue }
+    } catch (_) {}
+  }
+  online(false)
+  throw new Error('offline')
+}
+let isOnline = true
+function online (on, j) {
+  isOnline = on
+  $('offline').classList.toggle('on', !on)
+  if (!on) return live(null)
+  if (j && 'live' in j) live(j.live)
+  if (j && j.at) $('updated').textContent = 'Stand ' + new Date(j.at).toLocaleTimeString('de-DE') + ' · alle ' + (POLL_MS / 1000) + ' Sekunden neu'
+}
+function live (on) {
+  const el = $('live')
+  el.classList.toggle('on', !!on)
+  el.href = on ? TIKTOK + '/live' : TIKTOK
+  el.textContent = on ? 'LIVE' : on === null ? 'TikTok' : 'Offline'
+}
+
+// ------------------------------------------------------------------ Bereiche
+const VIEWS = ['uebersicht', 'haus', 'rang', 'stufen', 'regeln']
+let view = 'uebersicht'
+// eigenes Haus: nur der kurze Schlüssel, nur auf diesem Gerät gemerkt (kein Name, kein Konto)
+let me = { k: /^[0-9a-f]{12}$/.test(store.get('sh-k')) ? store.get('sh-k') : '', stufe: 0 }
+let haus = { q: '', k: '', search: false } // was gerade unter „Mein Haus“ steht
+let resetHaus = false
+
+function route () { const v = (location.hash || '').replace(/^#/, ''); show(VIEWS.includes(v) ? v : 'uebersicht') }
+function show (v) {
+  const changed = v !== view
+  view = v
+  if (v === 'haus' && resetHaus) { haus = { q: '', k: '', search: false }; $('q-haus').value = '' }
+  resetHaus = false
+  for (const x of VIEWS) $('v-' + x).classList.toggle('on', x === v)
+  document.querySelectorAll('nav.tabs a').forEach(a => a.classList.toggle('on', a.dataset.v === v))
+  if (changed) window.scrollTo(0, 0)
+  load(true)
+}
+function load (first) {
+  if (view === 'uebersicht') return loadStart()
+  if (view === 'haus') return loadHaus(first)
+  if (view === 'rang') return loadRang()
+  if (view === 'stufen') return loadStufen()
+}
+
+// ---------- Übersicht
+async function loadStart () {
+  let d
+  try { d = await get('/api/info') } catch (_) { return }
+  $('sHaeuser').textContent = fmt(d.haeuser); $('sHeute').textContent = fmt(d.heute); $('sAusbau').textContent = fmt(d.ausbauHeute); $('sHoechste').textContent = d.hoechste || '–'
+  const k = (d.top3 || [])[0]
+  put($('kingBox'), k
+    ? `<div class="king" data-k="${esc(k.k)}" role="button" tabindex="0">${pic(k.stufe, '', '')}<div class="who"><div class="tag">👑 Platz 1 in Stinkhausen</div><div class="nm">${esc(k.name)}</div><div class="sub">Stufe ${k.stufe} · ${esc(k.hausName)}</div></div></div>`
+    : '<div class="note">Noch steht kein Haus in der Stadt.</div>')
+  put($('podiumHome'), podium(d.top3 || []))
+  const feed = d.feed || []
+  put($('feed'), feed.length ? feed.map(e => `<div class="ev"><span class="ic">${e.art === 'einzug' ? '🏠' : '🔨'}</span><span class="tx"><b>${esc(e.name)}</b> ${e.art === 'einzug' ? 'ist eingezogen' + (e.hausName ? ' – ' + esc(e.hausName) : '') : e.hausName ? 'hat jetzt Stufe ' + e.stufe + ' · ' + esc(e.hausName) : 'hat das Haus ausgebaut'}</span><time>${ago(e.min)}</time></div>`).join('') : '<div class="note">Gerade ist es ruhig in der Stadt.</div>')
+}
+function podium (top) {
+  return [[top[1], 2], [top[0], 1], [top[2], 3]].map(([x, p]) => x
+    ? `<button class="pod p${p}" type="button" data-k="${esc(x.k)}">${pic(x.stufe, '', '')}<div class="pl">${p}</div><div class="nm">${esc(x.name)}</div><div class="pt">Stufe ${x.stufe} · ${esc(x.hausName)}</div></button>`
+    : `<div class="pod p${p}"><div class="pl">${p}</div><div class="pt">noch frei</div></div>`).join('')
+}
+
+// ---------- Mein Haus
+function openHaus (o) {
+  haus = { q: o.q || '', k: o.k || '', search: !!o.search }
+  if (o.q) $('q-haus').value = o.q
+  if (location.hash !== '#haus') location.hash = '#haus'
+  else loadHaus(true)
+}
+async function loadHaus (first) {
+  const box = $('hausBox')
+  if (!haus.q && !haus.k) {
+    if (me.k) haus = { q: '', k: me.k, search: false }
+    else return put(box, '<div class="note">Tipp deinen TikTok-Namen ein, dann zeigen wir dir dein Haus in Stinkhausen – mit Stufe und Platz in der Stadt.</div>')
+  }
+  const want = haus
+  if (first) put(box, '<div class="skel" style="height:420px"></div>')
+  let d
+  try { d = await get('/api/haus?' + (want.k ? 'k=' + encodeURIComponent(want.k) : 'name=' + encodeURIComponent(want.q))) } catch (_) { if (first) put(box, ''); return }
+  if (want !== haus) return // inzwischen etwas anderes gesucht
+  if (d.found) return showHaus(d.haus)
+  if (d.vorschlaege && d.vorschlaege.length) {
+    return put(box, `<div class="card"><b style="font:400 21px var(--head);letter-spacing:.5px">MEINST DU EINS VON DIESEN HÄUSERN?</b><div class="sugg">${d.vorschlaege.map(x => rowHtml(x, '', true)).join('')}</div></div>`)
+  }
+  if (want.k && want.k === me.k) { me = { k: '', stufe: 0 }; store.set('sh-k', '') } // gemerktes Haus gibt es nicht mehr
+  put(box, '<div class="note"><b>Kein Haus unter diesem Namen.</b><br>Schau, ob der Name genau so geschrieben ist wie bei TikTok. Neue Häuser stehen kurz nach dem Einzug hier.</div>')
+}
+function showHaus (x) {
+  const mine = !!me.k && x.k === me.k
+  if (mine) me.stufe = x.stufe
+  const btn = []
+  if (!mine && haus.search) btn.push(`<button class="btn" type="button" data-act="merken" data-k="${esc(x.k)}" data-s="${x.stufe}">✓ Mein Haus – merken</button>`)
+  if (mine) btn.push('<button class="btn ghost" type="button" data-act="vergessen">Vergessen</button>')
+  if (!mine && me.k) btn.push('<button class="btn ghost" type="button" data-act="meins">← Zurück zu meinem Haus</button>')
+  btn.push('<a class="btn ghost" href="#stufen">Alle 25 Häuser</a>')
+  const nx = x.naechste
+  put($('hausBox'), `<div class="card akte">
+    <div class="top"><span>${mine ? '🏠 Dein Haus' : haus.search ? 'Hausakte · Stinkhausen' : 'Haus von'}</span><span class="stamp">Platz ${fmt(x.platz)}</span></div>
+    ${pic(x.stufe, 'big', x.hausName + ' von ' + x.name)}
+    <div class="who2"><div class="nm">${esc(x.name)}</div>
+      <div class="badges"><span class="bd ${grp(x.stufe)}">Stufe ${x.stufe} von ${x.stufen || 25}</span><span class="bd">Platz ${fmt(x.platz)} von ${fmt(x.von)}</span></div></div>
+    <div class="lvl"><span class="n">${x.stufe}</span><span class="t">${esc(x.hausName)}</span><span class="c">${esc((STUFEN[x.stufe - 1] || [])[1] || '')}</span></div>
+    <div class="facts"><div><b>${fmt(x.platz)}</b><span>Platz in der Stadt</span></div><div><b>${fmt(x.von)}</b><span>Häuser in Stinkhausen</span></div></div>
+    ${nx ? `<div class="next">${pic(nx.stufe, '', '')}<div><small>Das nächste Haus</small><b>Stufe ${nx.stufe} · ${esc(nx.name)}</b></div></div>` : '<div class="next"><span style="font-size:30px">👑</span><div><small>Ganz oben</small><b>Das größte Haus der Stadt</b></div></div>'}
+    <div class="actions">${btn.join('')}</div>
+  </div>`)
+}
+
+// ---------- Rangliste
+function rowHtml (x, meK, plain) {
+  return `<button class="row1${x.k === meK ? ' me' : ''}" type="button" data-k="${esc(x.k)}"${plain ? ' data-search="1"' : ''}><span class="ps">${x.platz}</span>${pic(x.stufe, '', '')}<span class="nm">${esc(x.name)}<small>${esc(x.hausName)}</small></span><span class="pt">${x.stufe}<small>STUFE</small></span></button>`
+}
+async function loadRang () {
+  let d
+  try { d = await get('/api/rang' + (me.k ? '?k=' + me.k : '')) } catch (_) { return }
+  const meK = d.ich ? d.ich.k : ''
+  $('rangCount').textContent = 'Top ' + Math.min(50, d.von || 0) + ' von ' + fmt(d.von) + ' Häusern'
+  put($('podium'), podium((d.liste || []).slice(0, 3)))
+  put($('meBox'), d.ich && d.ich.platz > 3 ? `<h2>Dein Platz</h2><div class="list">${d.ich.nah.map(x => rowHtml(x, meK)).join('')}</div><h2>Top 50</h2>` : '')
+  const rest = (d.liste || []).slice(3)
+  put($('rangList'), rest.length ? rest.map(x => rowHtml(x, meK)).join('') : '<div class="note">Noch keine weiteren Häuser.</div>')
+}
+
+// ---------- Stufen (ohne Datenserver, steht immer)
+let stufenFor = null
+async function loadStufen () {
+  if (me.k && !me.stufe && isOnline) { try { const d = await get('/api/haus?k=' + me.k); if (d.found) me.stufe = d.haus.stufe } catch (_) {} }
+  if (stufenFor === me.stufe) return
+  stufenFor = me.stufe
+  put($('stufenBox'), GRUPPEN.map(([from, title, icon], gi) => {
+    const to = (GRUPPEN[gi + 1] || [STUFEN.length + 1])[0] - 1
+    let rows = ''
+    for (let n = from; n <= to; n++) {
+      rows += `<div class="lv${n === me.stufe ? ' mine' : ''}">${pic(n, '', STUFEN[n - 1][0])}<div class="nm">${esc(STUFEN[n - 1][0])}<small>${esc(STUFEN[n - 1][1])}</small>${n === me.stufe ? '<span class="here">DEIN HAUS</span>' : ''}</div><div class="need">${n}<small>STUFE</small></div></div>`
+    }
+    return `<div class="block"><div class="bh"><span class="tg" style="background:var(--${grp(from)})">${icon}</span>${esc(title)}<small>Stufe ${from}–${to}</small></div>${rows}</div>`
+  }).join(''))
+}
+
+// ------------------------------------------------------------------ Bedienung
+document.addEventListener('click', e => {
+  const act = e.target.closest('[data-act]')
+  if (act) {
+    if (act.dataset.act === 'merken') { me = { k: act.dataset.k, stufe: Number(act.dataset.s) || 0 }; store.set('sh-k', me.k); stufenFor = null; $('hausBox')._h = ''; loadHaus(false) }
+    if (act.dataset.act === 'vergessen') { me = { k: '', stufe: 0 }; store.set('sh-k', ''); stufenFor = null; $('hausBox')._h = ''; loadHaus(false) }
+    if (act.dataset.act === 'meins') { $('q-haus').value = ''; openHaus({ k: me.k }) }
+    return
+  }
+  const item = e.target.closest('[data-k]')
+  if (item) openHaus({ k: item.dataset.k, search: !!item.dataset.search })
+})
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.classList && e.target.classList.contains('king')) e.target.click() })
+$('f-haus').addEventListener('submit', e => { e.preventDefault(); const q = $('q-haus').value.trim(); if (q) openHaus({ q, search: true }) })
+$('f-start').addEventListener('submit', e => { e.preventDefault(); const q = $('q-start').value.trim(); if (q) openHaus({ q, search: true }) })
+// „Mein Haus“ unten antippen = immer zurück zum eigenen Haus (nicht zum zuletzt angesehenen fremden)
+document.querySelector('nav.tabs a[data-v="haus"]').addEventListener('click', () => { resetHaus = true; if (view === 'haus') show('haus') })
+window.addEventListener('hashchange', route)
+document.addEventListener('visibilitychange', () => { if (!document.hidden) load(false) })
+setInterval(() => { if (!document.hidden && view !== 'stufen' && view !== 'regeln') load(false) }, POLL_MS)
+// direkter Link mit ?name=… : gleich das Haus zeigen
+try { const q = new URLSearchParams(location.search).get('name'); if (q) { haus = { q: q.slice(0, 40), k: '', search: true }; $('q-haus').value = haus.q; if (location.hash !== '#haus') history.replaceState(null, '', location.pathname + location.search + '#haus') } } catch (_) {}
+route()
+</script>
+</body>
+</html>
